@@ -1,0 +1,40 @@
+# IDE
+.idea/
+.vscode/
+
+# LaTeX 编译中间文件
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.ent
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.synctex(busy)
+*.toc
+*.lof
+*.lot
+*.idx
+*.ilg
+*.ind
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.spl
+
+# 例外：保留 DSA 决策树实验结果
+!DSA/Lab2/data/*.out
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 系统
+.DS_Store
+Thumbs.db

@@ -1,0 +1,80 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage{ctex}
+\usepackage{float, booktabs, parskip}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs, bm}
+\usepackage{graphicx, subfigure, svg}
+\usepackage{hyperref, endnotes}
+\usepackage{listings}
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\allowdisplaybreaks[4]
+
+
+\title{{\Huge{\textbf{Homework 1 \\}}}}
+\author{刘滨瑞 \quad 2021012579 \quad 未央-水木12}
+
+\begin{document}
+
+\maketitle
+
+    \section{}
+
+        面积$A = bh + mh^2$，湿周$\chi = b + 2h \sqrt{1 + m^2}$，水力半径$R = \frac{A}{\chi}$。
+
+        采用Manning公式：Chezy系数$C = \frac{1}{n} R^{\frac{1}{6}}$。
+
+        代入流量计算式中，求得：$Q = A C \sqrt{R i} = \frac{(b h + m h^2)^{\frac{5}{3}} i^{\frac{1}{2}}}{(b + 2h \sqrt{1 + m^2})^{\frac{2}{3}} n} = 1.617 m^3 s^{-1}$。
+
+    \section{}
+
+        矩形水力最优断面中，$m = 0$，$b = 2 h (\sqrt{1 + m^2} - m) = 2 h$。
+
+        流量计算式：$Q = A C \sqrt{R i} = \frac{(b h)^{\frac{5}{3}} i^{\frac{1}{2}}}{(b + 2h)^{\frac{2}{3}} n} = \frac{2^{\frac{1}{3}} h^{\frac{8}{3}} i^{\frac{1}{2}}}{n}$
+
+        求得：$h = (\frac{Q n}{2^{\frac{1}{3}} i^{\frac{1}{2}}}^{\frac{3}{8}}) = 1.118 m$，$b = 2.236 m$。
+
+    \section{}
+
+        流量：$Q = A C \sqrt{R i} = \frac{(b h)^{\frac{5}{3}} i^{\frac{1}{2}}}{(b + 2h)^{\frac{2}{3}} n}$。
+
+        省略单位，得到数值方程：$\sqrt{\frac{45}{32}} (1 + h)^{\frac{2}{3}} = h^{\frac{5}{3}}$。
+
+        构造不动点迭代：$h = \phi (h) = \sqrt{\frac{45}{32}} (\frac{1 + h}{h})^{\frac{2}{3}}$。
+
+        取迭代初值为$1$，$2$，结果一致，收敛到$h = 1.631$。
+
+        于是，正常水深为$h_0 = 1.63 m$。
+
+        计算代码如下：
+
+        \begin{lstlisting}[language=Python]
+    from numpy import power, sqrt
+    def f(h):
+        return sqrt(45/32) * power((1 + h) / h, 2/3)
+    h0 = 1
+    hs = [h0]
+    h_temp = h0
+    while True:
+        h_temp = f(h_temp)
+        if abs(h_temp - hs[-1]) < 1e-6:
+            print(f"h = {h_temp:.3f} m")
+            break
+        hs.append(h_temp)
+        \end{lstlisting}
+
+    \section{}
+
+        使用New Bing。
+
+        运行New Bing给出的代码，结果为$h_0 = 1.63 m$，与我们的答案一致。分析其解答思路，基本正确。
+
+        \begin{figure}[htbp]
+        \centering
+        \subfigure[Part 1]{\includegraphics[width=0.48\textwidth]{./assets/1.png}}
+        \subfigure[Part 2]{\includegraphics[width=0.48\textwidth]{./assets/2.png}}
+        \caption{与New Bing的对话记录}
+        \end{figure}
+
+\end{document}

@@ -1,0 +1,669 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage{ctex}
+\usepackage{float, booktabs, parskip}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs, bm}
+\usepackage{graphicx, subfigure, svg}
+\usepackage{algorithm, algorithmicx, algpseudocode}
+\usepackage{hyperref, endnotes}
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\allowdisplaybreaks[4]
+
+\newcommand{\under}[1]{\mathop{#1}\limits_}
+\newcommand{\norm}[1]{{\Vert #1 \Vert_2}}
+
+\newcommand{\expect}{{\mathbb{E}}}
+\newcommand{\unit}{{\mathbb{I}}}
+\newcommand{\prob}{{\mathbb{P}}}
+\newcommand{\EE}{{\mathcal{E}}}
+\newcommand{\XX}{{\mathcal{X}}}
+\newcommand{\HH}{{\mathcal{H}}}
+\newcommand{\DD}{{\mathcal{D}}}
+\newcommand{\RR}{{\mathcal{R}}}
+\newcommand{\rh}{{\widehat{r}}}
+\newcommand{\rp}{{r^\prime}}
+
+
+\title{{\Huge{\textbf{Report on Homework 2 \\}}} —— Machine Learning}
+\author{刘滨瑞 \\ 2021012579 \quad 未央-水木12}
+
+\begin{document}
+
+\maketitle
+
+\stepcounter{section}
+
+\section{概率近似正确}
+
+    \begin{enumerate}
+
+    \item 证明误差$\EE_{D} (\rh)$大于$\epsilon$当且仅当$\rh \le \rp$。
+
+        设$f(x)$为概率密度函数，根据期望误差的定义，有：
+        \begin{align*}
+        \EE_{D}(\rh)
+        =& \expect_{x \sim D_\XX}[\unit[\norm{x} \le r] \ne \unit[\norm{x} \le \rh]] \\
+        =& \int_{x \sim D_\XX}[\unit[\norm{x} \le r] \ne \unit[\norm{x} \le \rh]] f(x) dx \\
+        =& \int_{x \sim D_\XX, x \in C_r \backslash C_\rh} f(x) dx = \prob_{x \sim D_\XX}[C_r \backslash C_\rh]
+        \end{align*}
+
+        于是：
+        \begin{align*}
+        \EE_{D} (\rh) - \epsilon
+        =& \prob_{x \sim D_\XX}[C_r \backslash C_\rh] - \prob_{x \sim D_\XX}[C_r \backslash C_\rp] \\
+        =& \prob_{x \sim D_\XX}[C_\rp] - \prob_{x \sim D_\XX}[C_\rh]
+        \end{align*}
+
+        由概率的非负性，证得：
+        \begin{align*}
+        \rh < \rp \iff \prob_{x \sim D_\XX}[C_\rh] < \prob_{x \sim D_\XX}[C_\rp] \iff \EE_{D}(\rh) > \epsilon
+        \end{align*}
+
+    \item 证明：$\prob_{\DD_n}[\EE(\rh_{\DD_n}) > \epsilon] \le \exp(-n \epsilon)$。
+
+        使用第一问中的结论，根据Union Bound，有：
+        \begin{align*}
+        \prob_{\DD_n}[\EE(\rh_{\DD_n}) > \epsilon]
+        =& \prob_{\DD_n}[\rp > \rh_{\DD_n}] \\
+        =& \prob_{x_1, x_2, ..., x_n \sim D_\XX}[\rp > \under{\max}{x_j \in C_r} \norm{x_j}] \\
+        =& 1 - \prob_{x_1, x_2, ..., x_n \sim D_\XX}[\bigcup_{i = 1}^{n} [\rp \le \norm{x_i} \le r]] \\
+        \le& 1 - \sum_{i = 1}^{n} \prob_{x_i \sim D_\XX}[\rp \le \norm{x_i} \le r] \\
+        =& 1 - n \epsilon
+        \end{align*}
+
+        由指数函数的凸性，对任意$x \in \mathbb{R}$，$1 - x \le e^{-x}$恒成立，于是：
+        \begin{equation}
+        \prob_{\DD_n}[\EE(\rh_{\DD_n}) > \epsilon] \le 1 - n \epsilon \le \exp(-n \epsilon)
+        \end{equation}
+
+    \item 证明：该问题是PAC-可学习的。
+
+        任取$\epsilon, \delta > 0$，我们考察PAC框架所要求的概率不等式：
+        \begin{equation}
+        \prob_{\DD_n}[\EE(\rh_{\DD_n}) - \under{\min}{h \in \HH} \EE(h) \ge \epsilon] \le \delta
+        \end{equation}
+        对于本问题而言，有：$\under{\min}{h \in \HH} \EE(h) = \EE(\unit[x \in C_r]) = 0$。
+
+        将不等式(1)代入(2)中：
+        \begin{align*}
+        \prob_{\DD_n}[\EE(\rh_{\DD_n}) - \under{\min}{h \in \HH} \EE(h) \ge \epsilon]
+        =& \prob_{\DD_n}[\EE(\rh_{\DD_n}) \ge \epsilon] \\
+        =& \prob_{\DD_n}[\EE(\rh_{\DD_n}) > \epsilon] \\
+        \le& \exp(-n \epsilon)
+        \end{align*}
+
+        取充分大的$n$满足$n \ge (\epsilon \delta)^{-1}$，是关于$\epsilon^{-1}, \delta^{-1}$的多项式。
+        此时，$\exp(-n \epsilon) \le \exp(-\frac{1}{\delta}) \le \delta$，不等式(2)得以满足。
+
+        我们即证明了该问题是PAC-可学习的。
+
+    \item 当数据存在噪音时，求$\EE(r)$和$\EE(\rp)$。
+
+        考虑任意半径$r_0 \in [0, r]$，有：
+        \begin{align*}
+        \EE_{D_\eta}(r_0)
+        =& \expect_{x \sim D_\eta} [(1 - \eta) \unit[\unit[\norm{x} \le r] \ne \unit[\norm{x} \le r_0]]] \\
+        &+ \expect_{x \sim D_\eta} [\eta \unit[[\norm{x} \le r] \cap [\norm{x} \le r_0]]] \\
+        =& (1 - \eta) \prob[C_r \backslash C_{r_0}] + \eta \prob[C_{r_0}] \\
+        =& \eta \prob[C_r] + (1 - 2 \eta) \prob[C_r \backslash C_{r_0}]
+        \end{align*}
+
+        分别令$r_0$等于$r$和$\rp$，得：
+        \begin{align}
+        \EE_{D_\eta}(r) =& \eta \prob[C_r] \\
+        \EE_{D_\eta}(\rp) =& \eta \prob[C_r] + (1 - 2 \eta) \epsilon
+        \end{align}
+
+    \item 给出当存在噪音时，$\prob_{x \sim D_\eta} [\EE(\rh) - \EE(r) > \epsilon]$的上界，并证明此时该问题仍然是PAC-可学习的。
+
+        当存在噪音时，由(3)式可得：$\under{\min}{h \in \HH} \EE(h) = \EE(r) = \eta \prob[C_r]$。此时有：
+        \begin{align*}
+        \prob_{\DD_n \sim D_\eta^n} [\EE(\rh) - \EE(r) > \epsilon]
+        =& \prob_{\DD_n \sim D_\eta^n} [(1 - 2 \eta) \prob[C_r \backslash C_\rh] > \epsilon] \\
+        =& \prob_{\DD_n \sim D_\eta^n} [\prob[C_r \backslash C_\rh] > \frac{\epsilon}{1 - 2 \eta}]
+        \end{align*}
+
+        若$\prob[C_r] \le \frac{\epsilon}{1 - 2 \eta}$，则$\prob_{\DD_n \sim D_\eta^n} [\EE(\rh) - \EE(r) > \epsilon] = 0$，此时问题显然是PAC-可学习的。
+        不妨设$\prob[C_r] > \frac{\epsilon}{1 - 2 \eta}$。我们在$C_r$的内部构造同心圆$C_{r_\eta}$，使得$\prob[C_r \backslash C_{r_\eta}] = \frac{\epsilon}{1 - 2 \eta}$。
+
+        设基于$\DD_n$得到的分类函数为$h_{\DD_n}$，根据Union Bound，有：
+        \begin{align*}
+        \prob_{\DD_n \sim D_\eta^n} [\EE(\rh) - \EE(r) > \epsilon]
+        =& \prob_{\DD_n \sim D_\eta^n} [\prob[C_r \backslash C_\rh] > \prob[C_r \backslash C_{r_\eta}]] \\
+        =& \prob_{\DD_n \sim D_\eta^n} [r_\eta > \rh] \\
+        =& \prob_{x_i \sim D_{\eta \XX}}[\bigcap_{i = 1}^{n} [[r_\eta > \norm{x_i}] \cup [h(x_i) = 0]]] \\
+        =& 1 - \prob_{x_i \sim D_{\eta \XX}}[\bigcup_{i = 1}^{n} [[r_\eta \le \norm{x_i}] \cap [h(x_i) = 1]]] \\
+        \le& 1 - \sum_{i = 1}^{n} \prob_{x_i \sim D_{\eta \XX}}[[r_\eta \le \norm{x_i}] \cap [h(x_i) = 1]] \\
+        =& 1 - n (1 - \eta) \prob[C_r \backslash C_{r_\eta}] \\
+        =& 1 - n \epsilon \frac{1 - \eta}{1 - 2 \eta}
+        \end{align*}
+        综上，$\prob_{\DD_n \sim D_\eta^n} [\EE(\rh) - \EE(r) > \epsilon]$的上界为$1 - n \epsilon \frac{1 - \eta}{1 - 2 \eta}$。
+        等号在事件$[[r_\eta \le \norm{x_i}] \cap [h(x_i) = 1]]$两两互斥时取到，$i = 1, 2, ..., n$。
+
+        任取$\epsilon, \delta > 0$，我们考察PAC框架所要求的概率不等式：
+        \begin{equation}
+        \prob_{\DD_n \sim D_\eta^n}[\EE(\rh_{\DD_n}) - \under{\min}{h \in \HH} \EE(h) \ge \epsilon] \le \delta
+        \end{equation}
+        取$n \ge \frac{1 - \delta}{\epsilon} \frac{1 - 2 \eta}{1 - \eta}$，为关于$\epsilon^{-1}, \delta^{-1}$的多项式下界，有：
+        \begin{align*}
+        \prob_{\DD_n \sim D_\eta^n}[\EE(\rh_{\DD_n}) - \under{\min}{h \in \HH} \EE(h) \ge \epsilon]
+        =& \prob_{\DD_n \sim D_\eta^n} [\EE(\rh) - \EE(r) > \epsilon] \\
+        \le& 1 - n \epsilon \frac{1 - \eta}{1 - 2 \eta} \\
+        \le& 1 - \frac{1 - \delta}{\epsilon} \frac{1 - 2 \eta}{1 - \eta} \epsilon \frac{1 - \eta}{1 - 2 \eta} \\
+        =& \delta
+        \end{align*}
+
+        这说明，存在噪音时，该问题仍然是PAC-可学习的。
+
+    \end{enumerate}
+
+    \section{没有免费午餐定理（No-Free-Lunch Theorem）}
+
+    \begin{enumerate}
+
+    \item 求$L_{D^{(i)}}(f_i)$。
+
+        记$C = \{x_1, ..., x_{2n}\}$，在分布$D^{(i)}$下对应的标签为$G^{(i)} = \{y_1^{(i)}, ..., y_{2n}^{(i)}\}$，
+        根据分布$D^{(i)}$的定义，有：
+        \begin{align*}
+        L_{D^{(i)}}(f_i) = \sum_{s = 1}^{2n} \frac{1}{2 n} \unit[y_s^{(i)} \ne f_i(x_s)] = \sum_{s = 1}^{2n} \frac{1}{2 n} \unit[y_s^{(i)} \ne y_s^{(i)}] = 0
+        \end{align*}
+
+    \item 证明：$\under{\max}{1 \le i \le T} \expect_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)}))] \ge \under{\min}{1 \le j \le k} \frac{1}{T} \sum_{i = 1}^{T} L_{D^{(i)}}(A(S_j^{(i)}))$。
+
+        定义$l_{i, j}$为：
+        \begin{align*}
+        l_{i, j} = L_{D^{(i)}}(A(S_j^{(i)})) \ge 0
+        \end{align*}
+
+        理解$\DD_n^{(i)}$和$S_j^{(i)}$的定义，事实上可以认为$\DD_n^{(i)}$是从$\{S_1^{(i)}, ...,S_k^{(i)}\}$中等概率随机采样所得，因此：
+        \begin{align*}
+        \expect_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)}))] = \sum_{j=1}^{k} \frac{1}{k} L_{D^{(i)}}(A(S_j^{(i)})) = \frac{1}{k} \sum_{j=1}^{k} l_{i, j}
+        \end{align*}
+
+        原问题等价于证明：
+        \begin{align*}
+        \under{\max}{1 \le i \le T} \frac{1}{k} \sum_{j=1}^{k} l_{i, j} \ge \under{\min}{1 \le j \le k} \frac{1}{T} \sum_{i = 1}^{T} l_{i, j}
+        \end{align*}
+
+        注意到对于实序列而言，最大值$\ge$平均值$\ge$最小值，于是：
+        \begin{align*}
+        \under{\max}{1 \le i \le T} \frac{1}{k} \sum_{j=1}^{k} l_{i, j} \ge \frac{1}{T} \sum_{i = 1}^{T} \frac{1}{k} \sum_{j = 1}^{k} l_{i, j} = \frac{1}{k} \sum_{j = 1}^{k} \frac{1}{T} \sum_{i = 1}^{T} l_{i, j} \ge \under{\min}{1 \le j \le k} \frac{1}{T} \sum_{i = 1}^{T} l_{i, j}
+        \end{align*}
+
+        命题得证。
+
+    \item 证明：$\frac{1}{T} \sum_{i = 1}^{T} L_{D^{(i)}}(A(S_j^{(i)})) \ge \frac{1}{2 p T} \sum_{r = 1}^{p} \sum_{i = 1}^{T} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)]$。
+
+        由于$p \ge n$，我们有：
+        \begin{align*}
+        &\frac{1}{T} \sum_{i = 1}^{T} L_{D^{(i)}}(A(S_j^{(i)})) - \frac{1}{2 p T} \sum_{r = 1}^{p} \sum_{i = 1}^{T} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)] \\
+        =& \frac{1}{T} \sum_{i = 1}^{T} (L_{D^{(i)}}(A(S_j^{(i)})) - \frac{1}{2p} \sum_{r = 1}^{p} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)]) \\
+        =& \frac{1}{T} \sum_{i = 1}^{T} (\frac{1}{2 n} \sum_{s = 1}^{2n} \unit[A(S_j^{(i)})(x_s) \ne f_i(x_s)] - \frac{1}{2p} \sum_{r = 1}^{p} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)]) \\
+        \ge& \frac{1}{T} \sum_{i = 1}^{T} ((\frac{1}{2 n} - \frac{1}{2 p}) \sum_{r = 1}^{p} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)]) \ge 0
+        \end{align*}
+
+        因此：
+        \begin{align*}
+        \frac{1}{T} \sum_{i = 1}^{T} L_{D^{(i)}}(A(S_j^{(i)})) \ge \frac{1}{2 p T} \sum_{r = 1}^{p} \sum_{i = 1}^{T} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)]
+        \end{align*}
+
+    \item 证明：$\under{\max}{1 \le i \le T} \expect_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)}))] \ge \frac{1}{4}$
+
+        组合第二问和第三问中证明的不等式，得：
+        \begin{align*}
+        \under{\max}{1 \le i \le T} \expect_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)}))]
+        \ge& \under{\min}{1 \le j \le k} \frac{1}{T} \sum_{i = 1}^{T} L_{D^{(i)}}(A(S_j^{(i)})) \\
+        \ge& \under{\min}{1 \le j \le k} \frac{1}{2 p T} \sum_{r = 1}^{p} \sum_{i = 1}^{T} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)]
+        \end{align*}
+
+        由于我们考虑了所有可能的标签情形，所以对于$\forall i \in \{1, 2, ..., T\}$，总存在唯一的一个$i^\prime \in \{1, 2, ..., T\}$，
+        使得对于任意一种输入$x \in C$，$f_i(x)$和$f_{i^\prime}(x)$的值总是一个为$0$，一个为$1$，于是：
+        \begin{align*}
+        &\sum_{i = 1}^{T} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)] \\
+        =& \frac{1}{2} \sum_{i = 1}^{T} (\unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)] + \unit[A(S_j^{(i)})(v_r) \ne f_{i^\prime}(v_r)]) \\
+        =& \frac{1}{2} \sum_{i = 1}^{T} 1 = \frac{T}{2}
+        \end{align*}
+
+        综上：
+        \begin{align*}
+        \under{\max}{1 \le i \le T} \expect_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)}))]
+        \ge& \under{\min}{1 \le j \le k} \frac{1}{2 p T} \sum_{r = 1}^{p} \sum_{i = 1}^{T} \unit[A(S_j^{(i)})(v_r) \ne f_i(v_r)] \\
+        =& \under{\min}{1 \le j \le k} \frac{1}{2 p T} \sum_{r = 1}^{p} \frac{T}{2} = \frac{1}{4}
+        \end{align*}
+
+        命题得证。
+
+    \item 证明No-Free-Lunch Theorem。
+
+        在本题所给出的框架内，No-Free-Lunch Theorem等价于证明：
+        存在$i \in \{1, 2, ..., T\}$，使得$\prob_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)})) \ge \frac{1}{8}] \ge \frac{1}{7}$。
+
+        应用题目给出的引理和第四问的结论：
+        \begin{align*}
+        \prob_{\DD_n^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)})) \ge \frac{1}{8}]
+        \ge& \frac{\expect_{D^{(i)}}[L_{D^{(i)}}(A(\DD_n^{(i)}))] - \frac{1}{8}}{1 - \frac{1}{8}} \\
+        \ge& \frac{\frac{1}{4} - \frac{1}{8}}{1 - \frac{1}{8}} = \frac{1}{7}
+        \end{align*}
+
+        这样我们即证明了No-Free-Lunch Theorem。
+
+    \item 试说明：若$\XX$为无限集，假设空间$\HH$为$\XX \rightarrow \{0, 1\}$的所有函数，则该分类问题不总是PAC-可学习的。
+
+        不妨设$\XX = (0, 1)$。取$\epsilon_0, \delta_0 \in (0, \frac{1}{2})$，数据分布$D$为$\XX$上的均匀分布，且标签全部为$0$。
+        对于任意大的采样规模$n$。考虑在PAC框架下的概率近似条件：
+        \begin{align*}
+        \prob_{\DD_n \sim D^n} [\EE(A(\DD_n)) - \under{\min}{h \in \HH}\EE(h) > \epsilon_0]
+        = \prob_{\DD_n \sim D^n} [L_D(A(\DD_n)) > \epsilon_0] \le \delta_0
+        \end{align*}
+
+        设$U$是$\XX$中未曾在$\DD_{n\XX}$中出现过的元素的集合。显然，$U$是可测无限集，有：
+        \begin{align*}
+        \prob_{\DD_n \sim D^n} [L_D(A(\DD_n)) > \epsilon_0]
+        =& \prob_{\DD_n \sim D^n} [\int_{x \in \XX} \unit[A(\DD_n)(x) = 0] dx  > \epsilon_0] \\
+        >& \prob_{\DD_n \sim D^n} [\int_{x \in U} \unit[A(\DD_n)(x) = 0] dx  > \epsilon_0]
+        \end{align*}
+
+        由于学习算法$A$不可能观察到$U$中的元素，因此对于任意的$x \in U$，应有$\prob[A(\DD_n)(x) = 0] = \frac{1}{2}$。
+        因此，$\int_{x \in U} \unit[A(\DD_n)(x) = 0] dx$服从于Dirac分布$\delta(x - \frac{1}{2})$。于是：
+        \begin{align*}
+        \prob_{\DD_n \sim D^n} [L_D(A(\DD_n)) > \epsilon_0]
+        >& \prob_{\DD_n \sim D^n} [\int_{x \in U} \unit[A(\DD_n)(x) = 0] dx  > \epsilon_0] \\
+        =& \prob_{\DD_n \sim D^n} [\frac{1}{2} > \epsilon_0] \\
+        =& 1 > \delta_0
+        \end{align*}
+
+        综上，此时假设空间$\HH$不满足PAC框架下的概率近似条件。这说明该分类问题不总是PAC-可学习的。
+
+    \end{enumerate}
+
+    \section{类别分布的学习}
+
+    \begin{enumerate}
+
+    \item 证明：对任意的$\delta > 0$，$\prob[\bigcap_{i = 1}^{k} [\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 \le m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}]] \ge 1 - \delta$。
+
+        由Union Bound：
+        \begin{align*}
+        &\prob[\bigcap_{i = 1}^{k} [\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 \le m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}]] \\
+        =& 1 - \prob[\bigcup_{i = 1}^{k} [\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}]] \\
+        \ge& 1 - \sum_{i = 1}^{k} \prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}]
+        \end{align*}
+
+        只需证明：对$\forall i \in \{1, 2, ..., k\}$，均有：
+        \begin{align*}
+        \prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}] \le \frac{\delta}{k}
+        \end{align*}
+
+        固定$i$，不难发现：
+        \begin{align*}
+        \expect_{X_i^{(s)}}[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1]
+        =& \expect_{X_i^{(s)}}[\sum_{j = 1}^{m} \vert p_{i, j} - \hat{p_{i, j}} \vert] \\
+        =& \sum_{j = 1}^{m} \expect_{X_i^{(s)}}[\vert p_{i, j} - \hat{p_{i, j}} \vert] \\
+        =& \sum_{j = 1}^{m} \expect_{X_i^{(s)}}[\vert \expect_{X_i}[\unit[X_i = j]] - \frac{1}{n} \sum_{s = 1}^{n} \unit[X_i^{(s)} = j] \vert] \\
+        =& \sum_{j = 1}^{m} (\vert \expect_{X_i}[\unit[X_i = j]] - \frac{1}{n} \sum_{s = 1}^{n} \expect_{X_i^{(s)}} \unit[X_i^{(s)} = j] \vert) \\
+        =& \sum_{j = 1}^{m} (\vert \expect_{X_i}[\unit[X_i = j]] -  \expect_{X_i}[\unit[X_i = j]] \vert) \\
+        =& 0
+        \end{align*}
+
+        定义$f(X_i^{(1)}, X_i^{(2)}, ..., X_i^{(n)}) = \Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1$，若其中$X_i^{(s_0)}$发生了改变，不妨设为从$j_0$变化为了$j_0^\prime$，则$f$相应产生的变化值等于：
+        \begin{align*}
+        \vert &\Delta f \vert \\
+        =& \vert \vert p_{i, j_0} - \frac{\sum_{s \ne s_0} \unit[X_i^{(s)} = j_0]}{n} - \frac{1}{n} \vert - \vert p_{i, j_0} - \frac{\sum_{s \ne s_0} \unit[X_i^{(s)} = j_0]}{n} \vert \\
+        &+ \vert p_{i, j_0^\prime} - \frac{\sum_{s \ne s_0} \unit[X_i^{(s)} = j_0^\prime]}{n} \vert - \vert p_{i, j_0^\prime} - \frac{\sum_{s \ne s_0} \unit[X_i^{(s)} = j_0^\prime]}{n} - \frac{1}{n} \vert \vert \\
+        \end{align*}
+        根据绝对值不等式，有：
+        \begin{align*}
+        \under{\sup}{X_i^{(1)}, ..., X_i^{(n)}, X_i^{(s_0)^\prime}} \vert \Delta f \vert = \under{\sup}{1 \le j_0 \ne j_0^\prime \le m} \vert \Delta f \vert \le \frac{2}{n}
+        \end{align*}
+
+        于是，应用McDiarmid's不等式，可得：
+        \begin{align*}
+        &\prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}] \\
+        =& \prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 - \expect[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1] > m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}] \\
+        \le& 2 \exp(- \frac{\frac{2 m^2}{2n} \log \frac{2 m k}{\delta}}{n (\frac{2}{n})^2}) \\
+        =& 2 \exp(- \frac{m^2}{4} \log \frac{2 m k}{\delta}) \\
+        =& 2 (\frac{\delta}{2 m k})^{\frac{m^2}{4}}
+        \end{align*}
+        由于$m = 1$时，命题显然成立，因此我们仅讨论$m \ge 2$的情形，此时$\frac{m^2}{4} \ge 1$，$\frac{\delta}{2 m k} \le 1$，故：
+        \begin{align*}
+        \prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > m \sqrt{\frac{1}{2n} \log \frac{2 m k}{\delta}}]
+        \le& 2 (\frac{\delta}{2 m k})^{\frac{m^2}{4}} \\
+        \le& 2 (\frac{\delta}{2 m k}) \\
+        =& \frac{\delta}{m k} \\
+        \le& \frac{\delta}{k}
+        \end{align*}
+
+        至此，我们即完成了对原命题的证明。
+
+    \item 证明：对任意的$\delta > 0$，$\prob[\bigcap_{i = 1}^{k} [\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 \le \sqrt{\frac{2}{n} \log \frac{k \cdot 2^m}{\delta}}]] \ge 1 - \delta$。
+
+        与第一问中的证明过程类似，如果我们用$\delta$替换$\frac{\delta}{k}$，则只需要证明对$\forall i \in \{1, 2, ..., k\}$，均有：
+        \begin{align*}
+        \prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \le \delta
+        \end{align*}
+
+        我们记$\mathcal{M} = \{-1, +1\}^m = \{\bm{u}_1, ..., \bm{u}_T\}$，$T = 2^m$。
+        注意到对任意的$\bm{v} \in \mathbb{R}^m$，$\Vert \bm{v} \Vert_1 = \under{\sup}{\bm{u} \in \mathcal{M}} \bm{u}^T \bm{v}$。
+        对于任意一个固定的$i$，使用Union Bound，可得：
+        \begin{align*}
+        &\prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \\
+        =& \prob[\under{\sup}{\bm{u} \in \mathcal{M}} \bm{u}^T (\bm{\hat{p_i}} - \bm{p_i}) > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \\
+        =& \prob[\bigcup_{r = 1}^{T} [\bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i}) > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}]] \\
+        \le& \sum_{r = 1}^{T} \prob[\bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i}) > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}]
+        \end{align*}
+
+        在所有的$\bm{u}_r$中，至多有一半（即$2^{m - 1}$个）使得$\bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i}) > 0$成立。
+        这是因为对于任意的$\bm{u}$，若$\bm{u}^T (\bm{\hat{p_i}} - \bm{p_i}) > 0$，则$(- \bm{u})^T (\bm{\hat{p_i}} - \bm{p_i}) < 0$，且$(- \bm{u}) \in \mathcal{M}$。
+        于是：
+        \begin{align*}
+        &\prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \\
+        \le& \sum_{r = 1}^{T} \prob[\bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i}) > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \\
+        \le& 2^{m - 1} \under{\max}{1 \le r \le T} \prob[\bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i}) > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}]
+        \end{align*}
+
+        对于任意一个固定的$r$，定义$f(X_i^{(1)}, X_i^{(2)}, ..., X_i^{(n)}) = \bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i})$。
+        我们可以证明：$\expect[f] = 0$，$\sup \vert \Delta f \vert \le \frac{2}{n}$，其过程和第一问中的证明完全一致，故不再赘述。
+        应用McDiarmid's不等式，可得：
+        \begin{align*}
+        &\prob[\Vert \bm{\hat{p_i}} - \bm{p_i} \Vert_1 > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \\
+        \le& 2^{m - 1} \under{\max}{1 \le r \le T} \prob[\bm{u}_r^T (\bm{\hat{p_i}} - \bm{p_i}) > \sqrt{\frac{2}{n} \log \frac{2^m}{\delta}}] \\
+        \le& 2^{m - 1} \cdot 2 \exp(- \frac{\frac{4}{n} \log \frac{2^m}{\delta}}{n (\frac{2}{n})^2}) \\
+        =& 2^m \cdot \frac{\delta}{2^m} \\
+        =& \delta
+        \end{align*}
+
+        命题得证。
+
+    \end{enumerate}
+
+    \section{有限假设空间的泛化界}
+
+        命题等价于：
+        \begin{align*}
+        \forall \delta > 0, \prob[\bigcap_{h \in \HH} [\EE(h) \le \hat{\EE}_{\DD_n}(h) + \sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}]] \ge 1 - \delta
+        \end{align*}
+
+        使用Union Bound和Hoeffding's不等式：
+        \begin{align*}
+        &\prob[\bigcap_{h \in \HH} [\EE(h) \le \hat{\EE}_{\DD_n}(h) + \sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}]] \\
+        \ge& \prob[\bigcap_{h \in \HH} [\vert \EE(h) - \hat{\EE}_{\DD_n}(h) \vert \le \sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}]] \\
+        =& 1 - \prob[\bigcup_{h \in \HH} [\vert \EE(h) - \hat{\EE}_{\DD_n}(h) \vert > \sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}]] \\
+        \ge& 1 - \sum_{h \in \HH} \prob[\vert \EE(h) - \hat{\EE}_{\DD_n}(h) \vert > \sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}] \\
+        \ge& 1 - \sum_{h \in \HH} 2 \exp(\frac{-2 \frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}{n \cdot \frac{1}{n^2}}) \\
+        =& 1 - \sum_{h \in \HH} \delta p(h) \\
+        =& 1 - \delta
+        \end{align*}
+
+        证毕。
+
+        我们将这一结果与课件上给出的泛化误差界相对比：
+        \begin{align*}
+        \forall \delta > 0, \prob[\bigcap_{h \in \HH} [\EE(h) \le \hat{\EE}_{\DD_n}(h) + \sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}}]] \ge 1 - \delta
+        \end{align*}
+        \begin{align*}
+        \forall \delta > 0, \prob[\bigcap_{h \in \HH} [\EE(h) \le \hat{\EE}_{\DD_n}(h) + \sqrt{\frac{\log \vert \HH \vert + \log \frac{2}{\delta}}{2n}}]] \ge 1 - \delta
+        \end{align*}
+
+        可以看出，两个误差界的区别仅仅在于表征假设空间大小的一项。
+        而事实上，课件上给出的泛化误差界是本题结果的一个特殊情况。
+        若我们认为学习算法选取每一个特定假设$h$的概率相等，则对于任意的$h$，$p(h) = \frac{1}{\vert \HH \vert}$。
+        此时$\sqrt{\frac{\log \frac{1}{p(h)} + \log \frac{2}{\delta}}{2n}} = \sqrt{\frac{\log \vert \HH \vert + \log \frac{2}{\delta}}{2n}}$，
+        两个结果完全一致。
+
+        从另一个角度看，在我们引入了于假设空间中选择假设的先验知识$p(h)$后，我们得到了更普遍的泛化误差界结论。
+        这一泛化误差界并不是关于$h$的一致界，而是会根据选择$h$的先验概率$p(h)$的变化而变化。
+        具体而言，$p(h)$越小，泛化误差界就越大。
+        极端情况下，若选择某一假设的先验概率$p(h) = 0$，则关于这一假设的泛化误差界将趋于无穷，针对该假设的可学习性也将不再有保证。
+
+        这也提示了我们，如果某一假设本身就发生的概率就很大，那么这一假设的泛化误差界会更紧，
+        其接近于最优假设$h^*$的概率也会更大，从而在期望意义下有着更小的误差。
+        这解释了为什么我们在设计学习算法时，如果能适当地引入正确的先验信息，便可以在一定程度上改善模型的性能。
+
+    \section{无穷假设空间的泛化界}
+
+    \subsection{Rademacher复杂度}
+
+    \begin{enumerate}
+
+    \item 若$\HH \subseteq \HH^\prime$，证明：$\RR_n(\HH) \le \RR_n(\HH^\prime)$。
+
+        假设样本$\bm{x}_i \sim D, i = 1, 2, ..., n$。$\bm{\sigma}$是每个分量均等可能为$-1$或$1$的Rademacher随机变量。
+
+        由于$\HH \subseteq \HH^\prime$，根据$\sup$的定义，有：
+        \begin{align*}
+        \RR_n(\HH)
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]] \\
+        \le& \expect_{D^n} [\expect_{\bm{\sigma}} [\max\{\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i), \sup_{h \in \HH^\prime \backslash \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)\}]] \\
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH^\prime} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]] \\
+        =& \RR_n(\HH^\prime)
+        \end{align*}
+
+        命题得证。
+
+    \item 证明：$\forall \alpha \in \mathbb{R}$，$\RR_n(\alpha \HH) = \vert \alpha \vert \RR_n(\HH)$，其中$\alpha \HH = \{\alpha h \mid \forall h \in \HH\}$。
+
+        若$\alpha = 0$，$\RR_n(\alpha \HH) = \vert \alpha \vert \RR_n(\HH) = 0$显然成立。
+        在下面的证明中，我们不妨设$\alpha \ne 0$。
+
+        根据$\bm{\sigma}$的定义，对$\bm{\sigma}$和$- \bm{\sigma}$求期望的结果是一致的。
+        因此，我们不妨设$\alpha > 0$，否则分别用$- \bm{\sigma}$和$- \alpha$替换$\bm{\sigma}$和$\alpha$即可。
+        于是，代入Rademacher复杂度的定义：
+        \begin{align*}
+        \RR_n(\alpha \HH)
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i \alpha h(\bm{x}_i)]] \\
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [ \vert \alpha \vert \sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]] \\
+        =& \vert \alpha \vert \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]] \\
+        =& \vert \alpha \vert \RR_n(\HH)
+        \end{align*}
+
+        命题得证。
+
+    \item 证明：$\RR_n(\HH + \HH^\prime) = \RR_n(\HH) + \RR_n(\HH^\prime)$，其中$\HH + \HH^\prime = \{h + h^\prime \mid \forall h \in \HH, \forall h^\prime \in \HH^\prime\}$。
+
+        我们首先证明$\sup$的一个性质：
+        \begin{equation}
+        \sup_{f \in \mathcal{F}, f^\prime \in \mathcal{F}^\prime} (f(\bm{x}_i) + f^\prime(\bm{x}_i)) = \sup_{f \in \mathcal{F}} f(\bm{x}_i) + \sup_{f^\prime \in \mathcal{F}^\prime} f^\prime(\bm{x}_i)
+        \end{equation}
+
+        由上确界的定义，$\forall \epsilon > 0$，$\exists f_\epsilon \in \mathcal{F}, f^\prime_\epsilon \in \mathcal{F}^\prime$，使得：
+        \begin{align*}
+        f_\epsilon(\bm{x}_i) &> \sup_{f \in \mathcal{F}} f(\bm{x}_i) + \frac{\epsilon}{2} \\
+        f^\prime_\epsilon(\bm{x}_i) &> \sup_{f^\prime \in \mathcal{F}^\prime} f^\prime(\bm{x}_i) + \frac{\epsilon}{2}
+        \end{align*}
+        两式相加：
+        \begin{align*}
+        f_\epsilon(\bm{x}_i) + f^\prime_\epsilon(\bm{x}_i) > \sup_{f \in \mathcal{F}} f(\bm{x}_i) + \sup_{f^\prime \in \mathcal{F}^\prime} f^\prime(\bm{x}_i) + \epsilon
+        \end{align*}
+        于是：
+        \begin{align*}
+        \sup_{f \in \mathcal{F}, f^\prime \in \mathcal{F}^\prime} (f(\bm{x}_i) + f^\prime(\bm{x}_i)) \ge \sup_{f \in \mathcal{F}} f(\bm{x}_i) + \sup_{f^\prime \in \mathcal{F}^\prime} f^\prime(\bm{x}_i)
+        \end{align*}
+        而由于$\sup$的次可加性：
+        \begin{align*}
+        \sup_{f \in \mathcal{F}, f^\prime \in \mathcal{F}^\prime} (f(\bm{x}_i) + f^\prime(\bm{x}_i)) \le \sup_{f \in \mathcal{F}} f(\bm{x}_i) + \sup_{f^\prime \in \mathcal{F}^\prime} f^\prime(\bm{x}_i)
+        \end{align*}
+        联合上面的两个不等式，我们即完成了对(6)式正确性的验证。
+
+        应用这一结论，可得：
+        \begin{align*}
+        &\RR_n(\HH + \HH^\prime) \\
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h_0 \in \HH + \HH^\prime} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h_0(\bm{x}_i)]] \\
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH, h^\prime \in \HH^\prime} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i (h(\bm{x}_i) + h^\prime(\bm{x}_i))]] \\
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i) + \sup_{h^\prime \in \HH^\prime} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h^\prime(\bm{x}_i)]] \\
+        =& \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]] + \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h^\prime \in \HH^\prime} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h^\prime(\bm{x}_i)]] \\
+        =& \RR_n(\HH) + \RR_n(\HH^\prime)
+        \end{align*}
+
+        原命题得证。
+
+    \item 证明：$\RR_n(\text{convex-hull}(\HH)) = \RR_n(\HH)$。
+
+        根据Rademacher复杂度的定义：
+        \begin{align*}
+        \RR_n(\text{convex-hull}(\HH)) &= \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \text{convex-hull}(\HH)} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]] \\
+        \RR_n(\HH) &= \expect_{D^n} [\expect_{\bm{\sigma}} [\sup_{h \in \HH} \frac{1}{n} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)]]
+        \end{align*}
+        我们只需要证明，对某一确定的$\bm{\sigma}$和$\bm{x}$，以下等式成立：
+        \begin{equation}
+        \sup_{h \in \text{convex-hull}(\HH)} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i) = \sup_{h \in \HH} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)
+        \end{equation}
+
+        考虑任意的$h \in \text{convex-hull}(\HH)$，
+        设$h = \sum_{j = 1}^{k} \lambda_j h_j$，其中$k \in \mathbb{N}_+$，$\sum_{j = 1}^{k} \lambda_j = 1$，$\lambda_j > 0$，$h_j \in \HH$。
+        有：
+        \begin{align*}
+        \sup_{h \in \text{convex-hull}(\HH)} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)
+        =& \sup_{k, \lambda_j, h_j} \sum_{i = 1}^{n} \sigma_i \sum_{j = 1}^{k} \lambda_j h_j(\bm{x}_i) \\
+        =& \sup_{k, \lambda_j, h_j} \sum_{j = 1}^{k} \lambda_j \sum_{i = 1}^{n} \sigma_i h_j(\bm{x}_i) \\
+        \le& \sup_{k, \lambda_j, h_j} \sum_{j = 1}^{k} \lambda_j \sup_{h \in \HH} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i) \\
+        =& (\sup_{h \in \HH} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)) \cdot \sup_{k, \lambda_j, h_j} \sum_{j = 1}^{k} \lambda_j \\
+        =& \sup_{h \in \HH} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)
+        \end{align*}
+
+        注意到$\HH \subseteq \text{convex-hull}(\HH)$，根据第一问的结论：
+        \begin{align*}
+        \sup_{h \in \text{convex-hull}(\HH)} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i) \ge \sup_{h \in \HH} \sum_{i = 1}^{n} \sigma_i h(\bm{x}_i)
+        \end{align*}
+
+        联合上面的两个不等式，我们即得到了(7)式。原命题得证。
+
+    \end{enumerate}
+
+    \subsection{增长函数}
+
+        根据增长函数的定义：
+        \begin{align*}
+        \Pi_\HH(n) = \under{\max}{x_1, x_2, ..., x_n \in \mathbb{R}} \vert \{h_{[a, b]}(x_1), ..., h_{[a, b]}(x_n) \mid a, b \in \mathbb{R}\} \vert
+        \end{align*}
+
+        对于某一组取定的$x_1, x_2, ..., x_n$，将其按递增顺序重排列为：$x_{s_1} \le x_{s_2} \le ... \le x_{s_n}$，
+        则$\{h_{[a, b]}(x_1), ..., h_{[a, b]}(x_n)\}$的种类数和将$x_{s_1}, x_{s_2}, ..., x_{s_n}$分为连续的至多三组子序列的方法数相等，
+        而这又等效于在序列的至多$n + 1$个间隔中选取两个作为划分界限。因此，$\vert \{h_{[a, b]}(x_1), ..., h_{[a, b]}(x_n) \mid a, b \in \mathbb{R}\} \vert \le C_{n + 2}^2$，
+        等号在$x_1, x_2, ..., x_n$互不相等时取到。
+
+        于是，我们得到了增长函数的代数表示：
+        \begin{align*}
+        \Pi_\HH(n) = C_{n + 2}^2 = \frac{(n + 2) (n + 1)}{2}
+        \end{align*}
+
+        将其代入课件上的增长函数与Rademacher复杂度间的不等式：
+        \begin{align*}
+        \RR_n(\HH) \le \sqrt{\frac{2 \log \Pi_\HH(n)}{n}} = \sqrt{\frac{2}{n} \log \frac{(n + 2) (n + 1)}{2}}
+        \end{align*}
+
+        综上，$\RR_n(\HH)$的上界等于$\sqrt{\frac{2}{n} \log \frac{(n + 2) (n + 1)}{2}}$。
+
+    \subsection{VC维}
+
+    \begin{enumerate}
+
+    \item 平面上所有轴对齐矩形构成的假设空间的VC维是多少？
+
+        平面上所有轴对齐矩形构成的假设空间的VC维为4。
+
+        首先，我们构造一种4个点的输入情况，使得任意标签情形均可以由某一个轴对齐矩形构造。构造如下：
+
+        输入点集：
+        \begin{align*}
+        P_1(1, 0), P_2(0, 1), P_3(-1, 0), P_4(0, -1)
+        \end{align*}
+        用于构造全部16种标签情形的轴对齐矩形：
+        \begin{align*}
+        \text{Rectangle}_{1} &= \{1 \le x \le 1, 0 \le y \le 0\} \\
+        \text{Rectangle}_{2} &= \{0 \le x \le 0, 1 \le y \le 1\} \\
+        \text{Rectangle}_{3} &= \{-1 \le x \le -1, 0 \le y \le 0\} \\
+        \text{Rectangle}_{4} &= \{0 \le x \le 0, -1 \le y \le -1\} \\
+        \text{Rectangle}_{5} &= \{-1 \le x \le 0, -1 \le y \le 1\} \\
+        \text{Rectangle}_{6} &= \{-1 \le x \le 1, -1 \le y \le 0\} \\
+        \text{Rectangle}_{7} &= \{0 \le x \le 1, -1 \le y \le 1\} \\
+        \text{Rectangle}_{8} &= \{-1 \le x \le 1, 0 \le y \le 1\} \\
+        \text{Rectangle}_{9} &= \{0 \le x \le 1, 0 \le y \le 1\} \\
+        \text{Rectangle}_{10} &= \{-1 \le x \le 0, 0 \le y \le 1\} \\
+        \text{Rectangle}_{11} &= \{-1 \le x \le 0, -1 \le y \le 0\} \\
+        \text{Rectangle}_{12} &= \{0 \le x \le 1, -1 \le y \le 0\} \\
+        \text{Rectangle}_{13} &= \{-1 \le x \le 1, 0 \le y \le 0\} \\
+        \text{Rectangle}_{14} &= \{0 \le x \le 0, -1 \le y \le 1\} \\
+        \text{Rectangle}_{15} &= \{-1 \le x \le 1, -1 \le y \le 1\} \\
+        \text{Rectangle}_{16} &= \{0 \le x \le 0, 0 \le y \le 0\}
+        \end{align*}
+        容易验证此构造的正确性。
+
+        然后，我们证明对于任意5个点的输入情况，均存在一种标签情形，不可能由某个轴对齐矩形构造。
+
+        使用反证法，若存在一种能够被打散的5点输入，显然这5个点互不重叠。
+        我们选取其中2个点，是y值最小和最大的点之一，分别记为$A$、$B$，不妨设$x_A \le x_B$。
+
+        此时若另外三个点中的某一个位于以$A$、$B$作为对角线的轴对齐矩形中，记为$P$。
+        则$h(A) = h(B) = 1$，而$h(C) = -1$的标签情况无法被满足，矛盾！
+
+        因此，另外的三个点只能严格位于$A$的左侧或$B$的右侧。
+        根据抽屉原理，必然存在两个点，同时严格在$A$的左侧或严格在$B$的右侧。
+        不妨设为$C$、$D$两点，它们均严格在$A$的左侧，满足$x_C \le x_D < x_A$。
+
+        同理于刚才的推导过程，若$D$位于以$A$、$C$作为对角线的轴对齐矩形中，将与假设矛盾。
+        而$A$是y值最小的点之一，$B$是y值最小的点之一，故$D$必然满足：$y_C < y_D \le y_B$。
+        但是，$D$也满足$x_C \le x_D < x_A \le x_B$，这说明$D$位于以$B$、$C$作为对角线的轴对齐矩形中，矛盾！
+
+        综上，所有情形均与反证假设矛盾。
+        我们从而证明了对于任意5个点的输入情况，均存在一种标签情形，不可能由某个轴对齐矩形构造。
+
+    \item $\HH = \{\unit[\sin(x + a) > 0] \mid \forall a \in \mathbb{R}\}$的VC维是多少？
+
+        $\HH$的VC维为2。
+
+        设输入规模为$n$，我们给出$n = 2$时的构造如下：
+        \begin{align*}
+        x_1 &= \frac{\pi}{6}, x_2 = \frac{5 \pi}{6} \\
+        a &= 0, \frac{\pi}{2}, \pi, \frac{3 \pi}{2} \text{\quad 分别对应着全部的4种标签情形}
+        \end{align*}
+
+        $n = 3$时，我们证明对于任意的输入$x_1, x_2, x_3$，均存在一种标签情形不可由假设空间中的某个函数生成。
+
+        不妨设$x_1 = 0$，否则由于$\HH$中的$a$可取任意实数，我们用$0$替换$x_1$，用$a + x_1$替换$a$，用$x_2 - x_1$替换$x_2$，用$x_3 - x_1$替换$x_3$即可。
+        注意到$\unit[\sin(x + a) > 0]$是$T = 2 \pi$的周期函数，
+        因此我们不妨设$a, x_2, x_3 \in [0, 2 \pi)$，且$0 < x_2 < x_3$。
+
+        使用反证法。
+        考虑以下四种标签情形：
+        \begin{align*}
+        \text{1:\quad}& h(x_1) = 1, h(x_2) = 1, h(x_3) = 1 \\
+        \text{2:\quad}& h(x_1) = 1, h(x_2) = 1, h(x_3) = -1 \\
+        \text{3:\quad}& h(x_1) = 1, h(x_2) = -1, h(x_3) = 1 \\
+        \text{4:\quad}& h(x_1) = 1, h(x_2) = -1, h(x_3) = -1
+        \end{align*}
+        记四种情形下，满足条件的$a$分别为$a_1, a_2, a_3, a_4 \in [0, 2 \pi)$。
+        对于$i = 1, 2, 3, 4$，$\sin(x_1 + a_i) = \sin(a_i) > 0$，有：$0 < a_i < \pi$成立。
+        于是，$0 < a_i + x_1, a_i + x_2, a_i + x_3 < 3 \pi$。
+
+        考虑第2种情形。
+        $a_2 + x_3 \in [\pi, 2 \pi]$，因此$a_2 + x_2 < a_2 + x_3 \le 2 \pi$，有$a_2 + x_2 \in (0, \pi)$成立。
+
+        考虑第3种情形。
+        $a_3 + x_2 \in [\pi, 2 \pi]$，因此$a_3 + x_3 > a_3 + x_2 \ge \pi$，有$a_3 + x_3 \in (2 \pi, 3 \pi)$成立。
+
+        整理从上面两种情形，得到不等式：
+        \begin{align*}
+        \pi - a_3 \le x_2 \le \pi - a_2 \\
+        2 \pi - a_3 \le x_3 \le 2 \pi - a_2
+        \end{align*}
+        从该不等式出发，考虑第1种和第4种情形，易得：
+        \begin{align*}
+        a_1 + x_2 \in& (0, \pi), a_1 + x_3 \in (2 \pi, 3 \pi) \\
+        a_4 + x_2 \in& [\pi, 2\pi], a_4 + x_3 \in [\pi, 2 \pi]
+        \end{align*}
+
+        整理：
+        \begin{align*}
+        \pi - a_4 \le x_2 < \pi - a_1 \\
+        2 \pi - a_1 < x_3 \le 2 \pi - a_4
+        \end{align*}
+        于是，我们同时得到了$a_1 < a_4$和$a_1 > a_4$，矛盾！
+
+        我们即证明了对于任意规模为4的输入，均存在一种标签情形不可由假设空间中的某个函数生成。
+
+    \end{enumerate}
+
+\end{document}

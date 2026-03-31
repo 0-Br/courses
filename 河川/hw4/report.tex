@@ -1,0 +1,106 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage{ctex}
+\usepackage{float, booktabs, parskip}
+\usepackage{amsmath, amsthm, amssymb, mathrsfs, bm}
+\usepackage{graphicx, subfigure, svg}
+\usepackage{hyperref, endnotes}
+\usepackage{listings}
+
+\setlength{\parindent}{4em}
+\setlength{\parskip}{1em}
+\allowdisplaybreaks[4]
+
+
+\newcommand{\di}{{\mathrm{d}}}
+
+
+\title{{\Huge{\textbf{Homework 4 \\}}}}
+\author{刘滨瑞 \quad 2021012579 \quad 未央-水木12}
+
+\begin{document}
+
+\maketitle
+
+    \section{}
+
+        \begin{figure}[htbp]
+        \centering
+        \subfigure{\includegraphics[width=0.70\textwidth]{./assets/1.png}}
+        \caption{题1图}
+        \end{figure}
+
+        $n = 6$。$B = n b = 30 m$。$B_0 = B + n d = 36 m$。
+
+        圆角形边墩，取$\zeta_k = 0.7$；半圆形中墩，取$\zeta_0 = 0.30$，侧收缩系数为：
+        $$\epsilon = 1 - 0.2 (\zeta_k + (n - 1) \zeta_0) (\frac{H_0}{B}) = 1 - \frac{11 H_0}{750 m}$$
+
+        $P_1 < 1.33 H_d$，为低堰，流量系数：
+        $$m = 0.4987 (\frac{P_1}{H_d})^{0.0241} = 0.4987$$
+
+        淹没系数变化不大，近似认为$H_0 = H$，有$\frac{h_s}{H} = 0.5$，$\frac{P_2}{H} = 1$。
+        查表，取淹没系数$\sigma_s = 0.9920$。
+
+        使用流量公式：
+        \begin{align*}
+        Q &= \epsilon \sigma_s m B \sqrt{2 g} H_0^{\frac{3}{2}} \\
+          &= (1 - \frac{11 H_0}{750 m}) \times 0.9920 \times 0.4987 \times 30 \times \sqrt{19.6} H_0^{\frac{3}{2}} (m^{\frac{3}{2}} s^{-1}) \\
+          &= 65.71 (1 - \frac{11 H_0}{750 m}) H_0^{\frac{3}{2}} (m^{\frac{3}{2}} s^{-1})
+        \end{align*}
+
+        于是：
+        $$v_0 = \frac{Q}{(H_0 + P_1) B_0} = 1.825 (1 - \frac{11 H_0}{750 m}) \frac{H_0^{\frac{3}{2}}}{4 m + H_0} (m^{\frac{1}{2}} s^{-1})$$
+
+        而$H_0 = H + \frac{v_0^2}{2 g}$，得：
+        $$(1 + \frac{4 m}{H_0}) \sqrt{1 - \frac{4 m}{H_0}} = 0.4122 (1 - \frac{11 H_0}{750 m})$$
+
+        使用scipy求解该超越方程，得：$H_0 = 4.162 m$。
+
+        代入流量公式：
+        $$Q = 523.9 (m^3 s^{-1})$$
+
+        教材答案为$Q = 525.9 (m^3 s^{-1})$，二者近似一致。
+
+    \section{}
+
+        \begin{figure}[htbp]
+        \centering
+        \subfigure{\includegraphics[width=0.70\textwidth]{./assets/2.png}}
+        \caption{题2图}
+        \end{figure}
+
+    \subsection{}
+
+        自由出流情况下，使用流量公式：
+        \begin{align*}
+        Q &= \varphi \epsilon_1 e b \sqrt{2 g (H_0 - \epsilon_1 e)} \\
+          &= 0.97 \times 0.62 \times 2 \times 6 \times \sqrt{19.6 (H_0 - 0.62 \times 2 m)} (m^{\frac{5}{2}} s^{-1}) \\
+          &= 31.95 \sqrt{H_0 - 1.24 m} (m^{\frac{5}{2}} s^{-1})
+        \end{align*}
+
+        于是：
+        $$v_0 = \frac{Q}{H_0 b} = 5.325 \frac{\sqrt{H_0 - 1.24 m}}{H_0}$$
+
+        而$H_0 = H + \frac{v_0^2}{2 g}$，得：
+        $$H_0 = 1.203 \sqrt{\frac{H_0 - 1.24}{H_0 - 10}}$$
+
+        使用scipy求解该超越方程，得：$H_0 = 10.13 m$。
+
+        代入流量公式：
+        $$Q = 95.24 (m^3 s^{-1})$$
+
+    \subsection{}
+
+        收缩水深：$h_{co} = \epsilon_1 e = 1.24 m$。
+
+        临界水深：$h_c = \sqrt[3]{\frac{Q^2}{b^2 g}} = 2.951 m$。
+
+        跃首傅汝德数：$Fr_1^2 = \frac{v_{co}^2}{g h_{co}} = \frac{Q^2}{h_{co}^3 b^2 g} = 13.48$。
+
+        共轭水深：$h_{co}^{\prime\prime} = \frac{h_{co}}{2} (\sqrt{1 + 8 Fr_1^2} - 1) = 5.85 m$。
+
+        说明当下游水深$h_0 < h_{co}^{\prime\prime} = 5.85 m$时，闸孔出流是自由出流。
+
+        否则，还需要考虑淹没水跃带来的能量损失，在计算流量时会引入一个淹没系数$\sigma_s$，使计算得到的出流流量变小。
+
+\end{document}
