@@ -28,10 +28,18 @@
 
 # Python 编译产物
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Java 编译产物
+*.class
+out/
 
 # 系统文件
 .DS_Store
