@@ -7,7 +7,7 @@
 | 目录 | 课程 | 语言 | 内容 |
 |------|------|------|------|
 | [DL](#dl) | 深度学习 | Python | CNN · MLP · RNN · GNN · Diffusion · GAN · Transformer |
-| [DSA](#dsa) | 数据结构与算法 | C++ | 编程作业 × 12 · 实验 × 3 · 课程评测工具 |
+| [DSA](#dsa) | 数据结构与算法 | C++ | 编程作业 × 9 · 实验 × 3 · 课程评测工具 |
 | [Fortran](#fortran) | Fortran 程序设计 | Fortran | 数值方法 · MPI/OpenMP 并行计算 · Jacobi 求解器 |
 | [Java](#java) | Java 程序设计 | Java | OOP · GUI · 网络编程 · 多线程 |
 | [ML](#ml) | 机器学习 | Python | SGD · SVM · 决策树 · 梯度提升 · 强化学习 |
@@ -36,7 +36,7 @@
 
 ## DSA
 
-数据结构与算法课程。12 个编程作业（PA）和 3 个实验（Lab），每题附有题目说明、C++ 实现和报告。
+数据结构与算法课程。9 个编程作业（PA，共 10 道题）和 3 个实验（Lab），每题附有题目说明、C++ 实现和报告。
 
 **编程作业：**
 
@@ -60,7 +60,7 @@
 | Lab3 | 平衡搜索树 | AVL 树与 Splay 树性能对比（随机/聚簇/顺序访问） |
 | Lab4 | 字符串匹配 | KMP、Trie、Aho-Corasick 自动机 |
 
-各 PA 目录下的 `checkit/` 为课程提供的自动评测工具。
+PA 目录下的 `checkit/` 为课程提供的自动评测工具（PA4-2 无）。
 
 ## Fortran
 
@@ -168,7 +168,7 @@ Python 程序设计课程。
 - **HW1**：tkinter GUI——小猪佩奇绘图（AutoCAD 坐标提取 + Photoshop 取色）、冬奥知识问答系统。
 - **HW2**：素数计数算法对比与性能分析。
 
-**在线评测（OJ1–OJ7，共 28 题）：** 覆盖 Fibonacci 数列、BST 操作、字符串处理、进制转换、哈希查询、Morse 编码、排列组合、分数运算类、日期类等。
+**在线评测（OJ1–OJ7，共 24 题）：** 覆盖 Fibonacci 数列、BST 操作、字符串处理、进制转换、哈希查询、Morse 编码、排列组合、分数运算类、日期类等。
 
 ## 声明
 
