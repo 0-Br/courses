@@ -7,7 +7,6 @@
 *.fdb_latexmk
 *.fls
 *.log
-*.out
 *.run.xml
 *.synctex.gz
 *.synctex(busy)
@@ -22,17 +21,28 @@
 *.vrb
 *.xdv
 *.spl
+*-blx.bib
 
-# 例外：保留 DSA 决策树实验结果
-!DSA/Lab2/data/*.out
+# LaTeX 的 *.out 仅限报告目录，避免吞掉课程作业的结果文件
+DL/*/report/*.out
+ML/*/report/*.out
+河川/*/*.out
 
 # Python 编译产物
 __pycache__/
-*.py[cod]
-*.egg-info/
-dist/
+*.pyc
+
+# 工具缓存
+.pytest_cache/
+.ruff_cache/
+
+# 打包产物
 build/
-*.egg
+dist/
+*.egg-info/
+
+# 就地虚拟环境（uv 等工具创建）
+.venv/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -40,6 +50,13 @@ build/
 # Java 编译产物
 *.class
 out/
+
+# 例外：保留课程给定的参考输出（必须置于 *.class 之后方能生效）
+!Java/hw6/example_output/**
+
+# 敏感信息（密钥、凭据类一律忽略；需保留模板文件时用 ! 例外）
+.env
+.env.*
 
 # 系统文件
 .DS_Store
