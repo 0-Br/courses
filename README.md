@@ -7,7 +7,7 @@
 | 目录 | 课程 | 语言 | 内容 |
 |------|------|------|------|
 | [DL](#dl) | 深度学习 | Python | CNN · MLP · RNN · GNN · Diffusion · GAN · Transformer |
-| [DSA](#dsa) | 数据结构与算法 | C++ | 编程作业 × 9 · 实验 × 3 · 课程评测工具 |
+| [DSA](#dsa) | 数据结构与算法 | C++ | 编程作业 × 9 · 实验 × 3 · 自建对拍工具 |
 | [Fortran](#fortran) | Fortran 程序设计 | Fortran | 数值方法 · MPI/OpenMP 并行计算 · Jacobi 求解器 |
 | [Java](#java) | Java 程序设计 | Java | OOP · GUI · 网络编程 · 多线程 |
 | [ML](#ml) | 机器学习 | Python | SGD · SVM · 决策树 · 梯度提升 · 强化学习 |
@@ -15,10 +15,10 @@
 | [大数据](#大数据) | 大数据技术 | Python | Jupyter notebook 数据分析实验 × 3 |
 | [实验](#实验) | 物理与工程实验 | Python | 物理实验数据分析 × 11 |
 | [数值](#数值) | 数值方法 | Python | 线性方程组求解 · 插值方法 |
-| [数据库](#数据库) | 数据库技术 | SQL / VC++ / Delphi | SQL 查询 · 数据库应用开发 × 3 |
+| [数据库](#数据库) | 数据库技术 | SQL | SQL 查询 · VC++/Delphi 数据库应用开发实验报告 × 2 |
 | [河川](#河川) | 河川水文学 | Python / LaTeX | 水文计算 × 4 |
 | [海气](#海气) | 海洋-大气相互作用 | Python | 气候指数分析 · Hadley 环流 |
-| [程设P](#程设p) | Python 程序设计 | Python | GUI 绘图 · OJ 算法题 × 28 |
+| [程设P](#程设p) | Python 程序设计 | Python | GUI 绘图 · OJ 算法题 × 24 |
 
 ---
 
@@ -29,14 +29,14 @@
 | 作业 | 主题 | 内容 |
 |------|------|------|
 | HW1 | 网络基础 | CNN 图像分类、MLP 时序预测（ETTh1 数据集） |
-| HW2 | 序列与图模型 | RNN/LSTM 序列建模、GNN 图分类（Cora 数据集） |
-| HW3 | 生成模型 | Diffusion 扩散模型（DDPM/DDIM 采样、分类器引导生成）、GAN、Transformer |
+| HW2 | 序列与图模型 | RNN/LSTM 序列建模、GNN 节点分类（Cora 数据集，GCN/GAT/GIN 与 node2vec 对比） |
+| HW3 | Transformer 与生成模型 | Transformer 时序预测（ETTh1 数据集，标准与稀疏注意力对比）、Diffusion 扩散模型（DDPM/DDIM 采样、分类器引导生成） |
 
-每次作业含 LaTeX 实验报告。模型权重（约 18.9 GB）已移至本地存档。
+每次作业含 LaTeX 实验报告。模型权重（约 18.9 GB）已移至本地存档，仅 HW1/MLP 保留一份 2.3 MB 的 checkpoint.pth。
 
 ## DSA
 
-数据结构与算法课程。9 个编程作业（PA，共 10 道题）和 3 个实验（Lab），每题附有题目说明、C++ 实现和报告。
+数据结构与算法课程。9 个编程作业（PA，共 10 道题）和 3 个实验（Lab），每题附有题目说明和 C++ 实现，除 PA4-2 的第二题 Whistory 外均附报告。
 
 **编程作业：**
 
@@ -46,11 +46,11 @@
 | PA2-1 | Unrolled List | 块状链表，O(√n) 操作 |
 | PA2-2 | Battery | 队列管理 |
 | PA2-3 | Build | 多叉树、层序遍历 |
-| PA3-1 | kth | 快速选择 |
+| PA3-1 | kth | AVL 树，节点维护子树规模 size 实现按秩查询 |
 | PA3-2 | Magician | 高级算法 |
 | PA4-1 | Process Schedule | 进程调度 |
 | PA4-2 | Q&A / Whistory | 多文件类设计、字符串算法 |
-| PA4-3 | Count Simple | 组合计数 |
+| PA4-3 | Count Simple | AVL 树模拟等价 BST 构建，插入时维护节点深度求深度和，O(n log n) |
 
 **实验：**
 
@@ -60,7 +60,7 @@
 | Lab3 | 平衡搜索树 | AVL 树与 Splay 树性能对比（随机/聚簇/顺序访问） |
 | Lab4 | 字符串匹配 | KMP、Trie、Aho-Corasick 自动机 |
 
-PA 目录下的 `checkit/` 为课程提供的自动评测工具（PA4-2 无）。
+各 PA 以及 Lab3、Lab4 目录下的 `checkit/` 是自建的对拍工具：`generator.py` 按题目规则生成随机测例存入 `input/`，`monitor.py`（Lab3、Lab4 为 `monitor.ipynb`）并发运行两份实现，用 `filecmp` 比对输出并统计耗时与超时，Lab3、Lab4 的版本另出效率对比图。PA4-2 的 checkit 位于子目录 `2/` 下，Lab2 没有。
 
 ## Fortran
 
@@ -109,9 +109,9 @@ HW4 含训练历史缓存（`.npy`），用于复现奖励曲线。
 
 **搜索（`search/`）：** 五子棋 AI，实现 Minimax（α-β 剪枝）、截断搜索（启发式评估函数）、MCTS（UCB1）和 AlphaZero 变体。评估函数基于棋形模式加权（活二/三/四、冲三/四）和中心距离偏置。
 
-**学习（`learn/`）：** 图像纹理分析（p3）、MNIST 手写数字分类（p4，MLP 实现）、文本情感分类（p5）。
+**学习（`learn/`）：** 决策树信息增益手算（p3，西瓜数据集上按 ID3 选划分属性建树）、MNIST 手写数字分类（p4，MLP 实现）、文本情感分类（p5）。
 
-**推理（`reasoning/`）：** LDA 主题模型，变分 EM 算法，中文分词与停用词处理，主题数 K ∈ {5, 10, 20}，以困惑度评估模型质量。
+**推理（`reasoning/`）：** LDA 主题模型，变分 EM 算法，中文分词与停用词处理，主题数 K ∈ {5, 10, 20}，通过对比三组主题词表选定 K=10（K=5 主题缺失，K=20 主题重复）。
 
 ## 大数据
 
@@ -135,26 +135,26 @@ HW4 含训练历史缓存（`.npy`），用于复现奖励曲线。
 
 数值方法课程，2 次作业。
 
-- **hw1**：线性方程组求解——迭代法（Gauss-Seidel、Jacobi、SOR）、LU 分解、LDL^T 分解。
+- **hw1**：线性方程组求解——迭代法（Gauss-Seidel、Jacobi）、LU 分解、LDL^T 分解。
 - **hw2**：插值方法——三次样条插值、抛物线插值。
 
 ## 数据库
 
 数据库技术课程，3 个开发实验，各含 Markdown 和 PDF 格式报告。
 
-- **SQL 实验**：DDL/DML 全流程（建表、约束、索引、视图），11 类复杂查询（聚合、子查询、连接、模式匹配）。
+- **SQL 实验**：DDL/DML 全流程（建表、约束、索引、视图），11 类复杂查询（排序、范围查询、分组聚合、子查询、多表连接）。
 - **VC++ 开发实验**：基于 ODBC 的 Windows 数据库应用。
 - **Delphi 开发实验**：可视化数据库应用开发。
 
 ## 河川
 
-河川水文学课程，4 次作业。以 Python 进行水文计算（Newton-Raphson 迭代求解水深等），LaTeX 撰写技术报告。
+河川水文学课程，4 次作业。以 Python 进行水文计算（不动点迭代求解正常水深、分段求和计算水面曲线长度等），LaTeX 撰写技术报告。
 
 ## 海气
 
 海洋-大气相互作用课程，3 次作业。
 
-- **HW2**：大气-海洋指数基础分析。
+- **HW2**：黑体辐射与 Planck 定律的 Python 基础练习——由 Stefan 定律反求地球有效发射温度，实现 Planck 谱辐射函数并绘制 6000 K 与 255 K 的双对数曲线。
 - **HW3**：Niño 3.4 指数分析（ERSSTv5 观测 1854–2020、CESM1 模式输出），El Niño/La Niña 位相识别。
 - **HW5**：Hadley 环流经向扩展分析。
 
@@ -166,7 +166,7 @@ Python 程序设计课程。
 
 **课程作业：**
 - **HW1**：tkinter GUI——小猪佩奇绘图（AutoCAD 坐标提取 + Photoshop 取色）、冬奥知识问答系统。
-- **HW2**：素数计数算法对比与性能分析。
+- **HW2**：Python 多线程性能实验——统计 10 万以内素数，对比单线程与多线程、4 线程与 10 线程的耗时，结合 GIL 分析多线程未能提速的原因。
 
 **在线评测（OJ1–OJ7，共 24 题）：** 覆盖 Fibonacci 数列、BST 操作、字符串处理、进制转换、哈希查询、Morse 编码、排列组合、分数运算类、日期类等。
 
